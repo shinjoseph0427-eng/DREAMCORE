@@ -328,13 +328,36 @@ wallBox(WALL_X * 2 + 0.3, WALL_H, 0.3, 0, WALL_H / 2, -0.15); // back wall
   glow.addColorStop(0.45, '#fff0fb');
   glow.addColorStop(1, '#ffc0dd');
 
-  ctx.font = 'italic 600 20px Georgia, "Times New Roman", serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(255, 184, 230, 0.25)';
   ctx.shadowBlur = 4;
   ctx.fillStyle = glow;
-  ctx.fillText('created by Jiseong Shin', 512, 126);
+
+  const iconX = 386, iconY = 108, iconSize = 36;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = glow;
+  ctx.beginPath();
+  const r = 10;
+  ctx.moveTo(iconX + r, iconY);
+  ctx.lineTo(iconX + iconSize - r, iconY);
+  ctx.quadraticCurveTo(iconX + iconSize, iconY, iconX + iconSize, iconY + r);
+  ctx.lineTo(iconX + iconSize, iconY + iconSize - r);
+  ctx.quadraticCurveTo(iconX + iconSize, iconY + iconSize, iconX + iconSize - r, iconY + iconSize);
+  ctx.lineTo(iconX + r, iconY + iconSize);
+  ctx.quadraticCurveTo(iconX, iconY + iconSize, iconX, iconY + iconSize - r);
+  ctx.lineTo(iconX, iconY + r);
+  ctx.quadraticCurveTo(iconX, iconY, iconX + r, iconY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(iconX + iconSize / 2, iconY + iconSize / 2, 8, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(iconX + iconSize - 10, iconY + 10, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.font = '600 24px "Segoe UI", system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('shinjoseph0427', iconX + iconSize + 18, 126);
 
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
