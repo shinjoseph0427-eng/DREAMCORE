@@ -331,8 +331,8 @@ wallBox(WALL_X * 2 + 0.3, WALL_H, 0.3, 0, WALL_H / 2, -0.15); // back wall
   ctx.font = 'italic 600 20px Georgia, "Times New Roman", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(255, 184, 230, 0.92)';
-  ctx.shadowBlur = 26;
+  ctx.shadowColor = 'rgba(255, 184, 230, 0.25)';
+  ctx.shadowBlur = 4;
   ctx.fillStyle = glow;
   ctx.fillText('created by Jiseong Shin', 512, 126);
 
