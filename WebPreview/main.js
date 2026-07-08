@@ -336,11 +336,6 @@ wallBox(WALL_X * 2 + 0.3, WALL_H, 0.3, 0, WALL_H / 2, -0.15); // back wall
   ctx.fillStyle = glow;
   ctx.fillText('created by Jiseong Shin', 512, 126);
 
-  ctx.shadowColor = 'rgba(95, 255, 234, 0.52)';
-  ctx.shadowBlur = 42;
-  ctx.globalAlpha = 0.38;
-  ctx.fillText('created by Jiseong Shin', 512, 126);
-
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
   const firstWallCredit = new THREE.Mesh(
