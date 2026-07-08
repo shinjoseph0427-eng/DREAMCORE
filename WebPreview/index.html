@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DREAM CORE - Web Preview</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/addons/"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="app"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+  <div class="dot"></div>
+  <div id="prompt"></div>
+  <div id="musicStatus">Music: Muted</div>
+  <div id="transitionFade"></div>
+
+  <div id="overlay">
+    <h1>DREAM CORE</h1>
+    <div class="sub">Local corridor browser preview</div>
+    <div class="hint">Click to Start</div>
+    <div class="controls">WASD - move&nbsp;&nbsp;|&nbsp;&nbsp;Mouse - look&nbsp;&nbsp;|&nbsp;&nbsp;Click - pointer lock / music&nbsp;&nbsp;|&nbsp;&nbsp;E - enter door / ride tube&nbsp;&nbsp;|&nbsp;&nbsp;M - mute&nbsp;&nbsp;|&nbsp;&nbsp;R - restart music&nbsp;&nbsp;|&nbsp;&nbsp;ESC - release</div>
+  </div>
+
+  <audio id="ambienceAudio" src="./assets/audio/Ambience.mp3" preload="auto" loop></audio>
+
+  <div id="loading">ENTERING THE DREAM...</div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

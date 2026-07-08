@@ -1,0 +1,10 @@
+=== Unity cleanup log started 2026-07-07 20:05:36 ===
+2026-07-07 20:06:00 Cleanup confirmed by user.
+2026-07-07 20:06:00 Process not running: Unity Hub
+2026-07-07 20:06:00 Process not running: Unity
+2026-07-07 20:06:00 Process not running: UnityCrashHandler64
+2026-07-07 20:06:00 Process not running: UnityCrashHandler32
+2026-07-07 20:06:00 Process not running: Unity.Licensing.Client
+2026-07-07 20:06:00 Checking for Unity Hub-related node.exe processes.
+2026-07-07 20:06:00 No Unity Hub-related node.exe processes found.
+2026-07-07 20:06:00 Removing broken Unity editor folder: C:\Program Files\Unity\Hub\Editor\6000.5.2f1
