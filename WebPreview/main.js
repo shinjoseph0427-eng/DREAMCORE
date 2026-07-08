@@ -317,6 +317,43 @@ for (let i = 0; i < SEGS; i++) {
 }
 wallBox(WALL_X * 2 + 0.3, WALL_H, 0.3, 0, WALL_H / 2, -0.15); // back wall
 
+// dreamy creator credit on the wall the player first sees
+{
+  const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 256;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, 1024, 256);
+
+  const glow = ctx.createLinearGradient(150, 0, 874, 0);
+  glow.addColorStop(0, '#bffff7');
+  glow.addColorStop(0.45, '#fff0fb');
+  glow.addColorStop(1, '#ffc0dd');
+
+  ctx.font = 'italic 600 72px Georgia, "Times New Roman", serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(255, 184, 230, 0.92)';
+  ctx.shadowBlur = 26;
+  ctx.fillStyle = glow;
+  ctx.fillText('created by Jiseong Shin', 512, 126);
+
+  ctx.shadowColor = 'rgba(95, 255, 234, 0.52)';
+  ctx.shadowBlur = 42;
+  ctx.globalAlpha = 0.38;
+  ctx.fillText('created by Jiseong Shin', 512, 126);
+
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const firstWallCredit = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.55, 0.64),
+    new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      depthWrite: false,
+    }));
+  firstWallCredit.position.set(0, 1.78, 0.012);
+  scene.add(firstWallCredit);
+}
+
 // front wall around the door
 const sideW = WALL_X + 0.15 - DOOR_W / 2;
 const openTop = WALK_H + DOOR_H;
