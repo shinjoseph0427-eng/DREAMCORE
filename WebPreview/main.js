@@ -328,7 +328,7 @@ wallBox(WALL_X * 2 + 0.3, WALL_H, 0.3, 0, WALL_H / 2, -0.15); // back wall
   glow.addColorStop(0.45, '#fff0fb');
   glow.addColorStop(1, '#ffc0dd');
 
-  ctx.font = 'italic 600 72px Georgia, "Times New Roman", serif';
+  ctx.font = 'italic 600 20px Georgia, "Times New Roman", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(255, 184, 230, 0.92)';
@@ -343,10 +343,8 @@ wallBox(WALL_X * 2 + 0.3, WALL_H, 0.3, 0, WALL_H / 2, -0.15); // back wall
 
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
-  const creditWidth = isTouchLike ? 0.46 : 2.1;
-  const creditHeight = isTouchLike ? 0.12 : 0.52;
   const firstWallCredit = new THREE.Mesh(
-    new THREE.PlaneGeometry(creditWidth, creditHeight),
+    new THREE.PlaneGeometry(2.55, 0.64),
     new THREE.MeshBasicMaterial({
       map: tex,
       transparent: true,
