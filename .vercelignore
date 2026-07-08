@@ -1,15 +1,17 @@
 # Vercel only serves the WebPreview static site (see vercel.json rewrites).
-# Everything below is the Unity project / docs and is not part of the website.
-Assets/
-Packages/
-ProjectSettings/
-UserSettings/
-UnityInstallRepair/
-Library/
-Temp/
-Logs/
-.github/
-*.md
-*.cmd
-*.ps1
-*.url
+# Patterns are ROOT-ANCHORED with a leading slash so they can never match a
+# nested path such as WebPreview/assets/ (Vercel ignore matching is
+# case-insensitive, so an unanchored "Assets" would wrongly drop "assets").
+/Assets
+/Packages
+/ProjectSettings
+/UserSettings
+/UnityInstallRepair
+/Library
+/Temp
+/Logs
+/.github
+/*.md
+/*.cmd
+/*.ps1
+/*.url
