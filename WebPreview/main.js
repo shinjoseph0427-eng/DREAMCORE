@@ -41,6 +41,9 @@ const CURB_OUT = 2.42;                // curb outer offset from channel centerli
 const SPAWN_LOCAL = { x: 12.4, z: -25.2 };
 
 // ----------------------------------------------------------------- setup
+const isTouchLike = matchMedia('(hover: none), (pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+const pixelRatioCap = isTouchLike ? 1.5 : 1.18;
+
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0xcbd8d0, 0.041);
 scene.background = new THREE.Color(0xcbd8d0);
@@ -50,7 +53,7 @@ camera.position.set(0, WALK_H + EYE, 0.95);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio * 0.72, 1.18));
+renderer.setPixelRatio(Math.min(devicePixelRatio * (isTouchLike ? 0.82 : 0.72), pixelRatioCap));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.82;
 document.getElementById('app').appendChild(renderer.domElement);
@@ -135,13 +138,26 @@ const retroPass = new ShaderPass({
 composer.addPass(retroPass);
 composer.addPass(new OutputPass());
 
-addEventListener('resize', () => {
-  camera.aspect = innerWidth / innerHeight;
+function viewportSize() {
+  return {
+    width: Math.max(1, Math.round(innerWidth)),
+    height: Math.max(1, Math.round(innerHeight)),
+  };
+}
+
+function resizeViewport() {
+  const { width, height } = viewportSize();
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  composer.setSize(innerWidth, innerHeight);
-  retroPass.uniforms.resolution.value.set(innerWidth, innerHeight);
-});
+  renderer.setPixelRatio(Math.min(devicePixelRatio * (isTouchLike ? 0.82 : 0.72), pixelRatioCap));
+  renderer.setSize(width, height);
+  composer.setSize(width, height);
+  retroPass.uniforms.resolution.value.set(width, height);
+}
+
+addEventListener('resize', resizeViewport);
+addEventListener('orientationchange', () => setTimeout(resizeViewport, 150));
+if (window.visualViewport) window.visualViewport.addEventListener('resize', resizeViewport);
 
 // ----------------------------------------------------------------- textures
 function mulberry32(a) {
@@ -1310,6 +1326,9 @@ let musicMuted = false;
 let musicFade = 0;
 let currentArea = 'corridor';
 let transitioning = false;
+let mobileActive = false;
+let mobileForwardHold = false;
+let mobileForwardPulse = 0;
 
 // pink-tube ride state
 let ridingTube = null;
@@ -1318,6 +1337,10 @@ const RIDE_SEAT = 1.06;  // seated eye height above the tube's waterline
 
 ambienceAudio.volume = 0;
 ambienceAudio.loop = true;
+
+if (isTouchLike) {
+  overlay.querySelector('.hint').textContent = 'Tap to enter';
+}
 
 function updateMusicStatus() {
   musicStatus.textContent = musicMuted ? 'Music: Muted' : 'Music: On';
@@ -1379,6 +1402,7 @@ function enterSecondArea() {
     camera.position.set(SPAWN_LOCAL.x, SECOND_FLOOR + EYE, SECOND_Z + SPAWN_LOCAL.z);
     // face into the hall, angled toward the leftward water route
     camera.lookAt(2.0, 1.3, SECOND_Z - 16);
+    syncMobileLookFromCamera();
     smoothY = camera.position.y;
   }, 650);
 
@@ -1414,19 +1438,128 @@ function dismountTube(t) {
   flash('YOU STEP OFF THE TUBE', 1.0);
 }
 
-overlay.addEventListener('click', () => {
+const mobileLook = {
+  pointerId: null,
+  downX: 0,
+  downY: 0,
+  lastX: 0,
+  lastY: 0,
+  downTime: 0,
+  moved: false,
+  longPressTimer: 0,
+  yaw: 0,
+  pitch: 0,
+};
+const mobileLookEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+const MOBILE_LOOK_SENSITIVITY = 0.0022;
+const MOBILE_TAP_MOVE_SECONDS = 0.34;
+const MOBILE_LONG_PRESS_MS = 260;
+const MOBILE_DRAG_DEADZONE = 7;
+
+function syncMobileLookFromCamera() {
+  mobileLookEuler.setFromQuaternion(camera.quaternion, 'YXZ');
+  mobileLook.pitch = mobileLookEuler.x;
+  mobileLook.yaw = mobileLookEuler.y;
+}
+
+function applyMobileLook(deltaX, deltaY) {
+  mobileLook.yaw -= deltaX * MOBILE_LOOK_SENSITIVITY;
+  mobileLook.pitch -= deltaY * MOBILE_LOOK_SENSITIVITY;
+  mobileLook.pitch = THREE.MathUtils.clamp(mobileLook.pitch, -Math.PI / 2 + 0.08, Math.PI / 2 - 0.08);
+  mobileLookEuler.set(mobileLook.pitch, mobileLook.yaw, 0);
+  camera.quaternion.setFromEuler(mobileLookEuler);
+}
+
+function beginExperience() {
   startAmbience();
-  controls.lock();
-});
+  if (isTouchLike) {
+    mobileActive = true;
+    syncMobileLookFromCamera();
+    overlay.classList.add('hidden');
+    document.body.classList.add('playing');
+  } else {
+    controls.lock();
+  }
+}
+
+overlay.addEventListener('pointerup', e => {
+  e.preventDefault();
+  beginExperience();
+}, { passive: false });
+
+overlay.addEventListener('click', e => {
+  e.preventDefault();
+}, { passive: false });
+
 controls.addEventListener('lock', () => {
   overlay.classList.add('hidden');
   document.body.classList.add('playing');
 });
 controls.addEventListener('unlock', () => {
+  if (mobileActive) return;
   overlay.classList.remove('hidden');
   overlay.querySelector('.hint').textContent = 'Click to Resume';
   document.body.classList.remove('playing');
 });
+
+function cancelMobileForwardHold() {
+  mobileForwardHold = false;
+  if (mobileLook.longPressTimer) clearTimeout(mobileLook.longPressTimer);
+  mobileLook.longPressTimer = 0;
+}
+
+function onMobilePointerDown(e) {
+  if (!isTouchLike || !mobileActive || mobileLook.pointerId !== null || e.pointerType === 'mouse') return;
+  e.preventDefault();
+  try { renderer.domElement.setPointerCapture(e.pointerId); } catch (_) {}
+  syncMobileLookFromCamera();
+  mobileLook.pointerId = e.pointerId;
+  mobileLook.downX = mobileLook.lastX = e.clientX;
+  mobileLook.downY = mobileLook.lastY = e.clientY;
+  mobileLook.downTime = performance.now();
+  mobileLook.moved = false;
+  cancelMobileForwardHold();
+  mobileLook.longPressTimer = setTimeout(() => {
+    if (mobileLook.pointerId === e.pointerId && !mobileLook.moved) mobileForwardHold = true;
+  }, MOBILE_LONG_PRESS_MS);
+}
+
+function onMobilePointerMove(e) {
+  if (!isTouchLike || e.pointerId !== mobileLook.pointerId) return;
+  e.preventDefault();
+  const dxTotal = e.clientX - mobileLook.downX;
+  const dyTotal = e.clientY - mobileLook.downY;
+  const dx = e.clientX - mobileLook.lastX;
+  const dy = e.clientY - mobileLook.lastY;
+  mobileLook.lastX = e.clientX;
+  mobileLook.lastY = e.clientY;
+
+  if (!mobileLook.moved && Math.hypot(dxTotal, dyTotal) > MOBILE_DRAG_DEADZONE) {
+    mobileLook.moved = true;
+    cancelMobileForwardHold();
+  }
+  if (mobileLook.moved) applyMobileLook(dx, dy);
+}
+
+function onMobilePointerUp(e) {
+  if (!isTouchLike || e.pointerId !== mobileLook.pointerId) return;
+  e.preventDefault();
+  const wasTap = !mobileLook.moved && performance.now() - mobileLook.downTime < MOBILE_LONG_PRESS_MS + 80;
+  try {
+    if (renderer.domElement.hasPointerCapture(e.pointerId)) renderer.domElement.releasePointerCapture(e.pointerId);
+  } catch (_) {}
+  mobileLook.pointerId = null;
+  cancelMobileForwardHold();
+  if (wasTap) mobileForwardPulse = Math.max(mobileForwardPulse, MOBILE_TAP_MOVE_SECONDS);
+}
+
+renderer.domElement.addEventListener('pointerdown', onMobilePointerDown, { passive: false });
+renderer.domElement.addEventListener('pointermove', onMobilePointerMove, { passive: false });
+renderer.domElement.addEventListener('pointerup', onMobilePointerUp, { passive: false });
+renderer.domElement.addEventListener('pointercancel', onMobilePointerUp, { passive: false });
+
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
 
 const keys = {};
 addEventListener('keydown', e => {
@@ -1499,10 +1632,13 @@ function animate() {
   const t = clock.elapsedTime;
 
   // movement
-  if (controls.isLocked) {
+  const inputActive = controls.isLocked || mobileActive;
+  if (inputActive) {
     const slow = keys.ShiftLeft || keys.ShiftRight || keys.ControlLeft || keys.ControlRight;
     const speed = slow ? 1.7 : 3.2;
-    const fwd = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0);
+    const mobileForward = mobileForwardHold || mobileForwardPulse > 0 ? 1 : 0;
+    if (mobileForwardPulse > 0) mobileForwardPulse = Math.max(0, mobileForwardPulse - dt);
+    const fwd = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) + mobileForward;
     const strafe = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
 
     const dir = new THREE.Vector3();
