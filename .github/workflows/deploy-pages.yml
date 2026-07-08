@@ -1,0 +1,45 @@
+name: Deploy WebPreview to GitHub Pages
+
+# Publishes the self-contained Three.js preview in WebPreview/ as a static
+# website. Only the WebPreview/ folder is served (the Unity project is not).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'WebPreview/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one deployment at a time; let an in-progress run finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload WebPreview as the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # serve the preview folder as the site root -> index.html + relative
+          # ./vendor, ./assets and ./main.js all resolve under /DREAMCORE/
+          path: WebPreview
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
