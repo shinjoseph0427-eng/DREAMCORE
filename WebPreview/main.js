@@ -1339,7 +1339,7 @@ ambienceAudio.volume = 0;
 ambienceAudio.loop = true;
 
 if (isTouchLike) {
-  overlay.querySelector('.hint').textContent = 'Tap to enter';
+  overlay.querySelector('.hint').innerHTML = 'Swipe to look around<br>Click and hold to move';
 }
 
 function updateMusicStatus() {
@@ -1451,7 +1451,7 @@ const mobileLook = {
   pitch: 0,
 };
 const mobileLookEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-const MOBILE_LOOK_SENSITIVITY = 0.0022;
+const MOBILE_LOOK_SENSITIVITY = 0.0026;
 const MOBILE_TAP_MOVE_SECONDS = 0.34;
 const MOBILE_LONG_PRESS_MS = 260;
 const MOBILE_DRAG_DEADZONE = 7;
