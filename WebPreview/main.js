@@ -374,6 +374,27 @@ scene.add(doorHalo);
   scene.add(label);
 }
 
+// creator credit on the first door
+{
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, 512, 96);
+  ctx.font = '600 34px "Segoe UI", sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#fff2f7';
+  ctx.shadowColor = 'rgba(255, 80, 165, 0.85)';
+  ctx.shadowBlur = 12;
+  ctx.fillText('created by JISEONG SHIN', 256, 50);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const credit = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.18, 0.22),
+    new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+  credit.position.set(0, WALK_H + DOOR_H * 0.37, TOTAL - 0.102);
+  credit.rotation.y = Math.PI;
+  scene.add(credit);
+}
+
 // pink tube above the door
 const tubeMat = new THREE.MeshStandardMaterial({
   color: 0xff9ecb, emissive: 0xff5faf, emissiveIntensity: 2.45, roughness: 0.62,
