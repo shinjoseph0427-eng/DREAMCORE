@@ -1472,7 +1472,7 @@ const mobileLook = {
   pitch: 0,
 };
 const mobileLookEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-const MOBILE_LOOK_SENSITIVITY = 0.0026;
+const MOBILE_LOOK_SENSITIVITY = 0.0030;
 const MOBILE_TAP_MOVE_SECONDS = 0.34;
 const MOBILE_LONG_PRESS_MS = 260;
 const MOBILE_DRAG_DEADZONE = 7;
